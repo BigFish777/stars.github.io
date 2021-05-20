@@ -6,20 +6,20 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="https://bigfish777.github.io/stars.github.io">
-  <title>一颗小土豆</title>
+  <title>mybatis源码分析--mybatis配置阶段的执行流程分析 | 一颗小土豆</title>
   <meta name="generator" content="hexo-theme-yilia-plus">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   
-  <meta name="description" content="mybatis源码分析-mybatis配置阶段的执行流程分析hello world看源码到底怎么去看，我总结的是要有目的的去看源码。例如mybatis,我们在github拉下来源码后发现一堆代码，没头没尾无从下手。但是如果我们先写一个Demo,来分析这个demo的每一步到底干了什么，就好分析了。这也就是为啥学习一门新技术都需要先学习怎么使用。 创建一个maven项目，引入mybatis的依赖&amp;lt">
+  <meta name="description" content="mybatis源码分析-mybatis配置阶段的执行流程分析看源码到底怎么去看，我总结的是要有目的的去看源码。例如mybatis,我们在github拉下来源码后发现一堆代码，没头没尾无从下手。但是如果我们先写一个Demo,来分析这个demo的每一步到底干了什么，就好分析了。这也就是为啥学习一门新技术都需要先学习怎么使用。 创建一个maven项目，引入mybatis的依赖&lt;dependency">
 <meta property="og:type" content="article">
-<meta property="og:title" content="一颗小土豆">
+<meta property="og:title" content="mybatis源码分析--mybatis配置阶段的执行流程分析">
 <meta property="og:url" content="https://bigfish777.github.io/stars.github.io/2021/05/20/mybatis%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90-mybatis%E9%85%8D%E7%BD%AE%E9%98%B6%E6%AE%B5%E7%9A%84%E6%89%A7%E8%A1%8C%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90/index.html">
 <meta property="og:site_name" content="一颗小土豆">
-<meta property="og:description" content="mybatis源码分析-mybatis配置阶段的执行流程分析hello world看源码到底怎么去看，我总结的是要有目的的去看源码。例如mybatis,我们在github拉下来源码后发现一堆代码，没头没尾无从下手。但是如果我们先写一个Demo,来分析这个demo的每一步到底干了什么，就好分析了。这也就是为啥学习一门新技术都需要先学习怎么使用。 创建一个maven项目，引入mybatis的依赖&amp;lt">
+<meta property="og:description" content="mybatis源码分析-mybatis配置阶段的执行流程分析看源码到底怎么去看，我总结的是要有目的的去看源码。例如mybatis,我们在github拉下来源码后发现一堆代码，没头没尾无从下手。但是如果我们先写一个Demo,来分析这个demo的每一步到底干了什么，就好分析了。这也就是为啥学习一门新技术都需要先学习怎么使用。 创建一个maven项目，引入mybatis的依赖&lt;dependency">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="c:/Users/24267/AppData/Roaming/Typora/typora-user-images/image-20210311132924065.png">
-<meta property="article:published_time" content="2021-05-20T02:31:33.931Z">
-<meta property="article:modified_time" content="2021-05-20T02:31:33.931Z">
+<meta property="article:published_time" content="2021-05-20T07:28:15.683Z">
+<meta property="article:modified_time" content="2021-05-20T07:28:15.683Z">
 <meta property="article:author" content="一颗小土豆">
 <meta property="article:tag" content="Java Python 大数据 算法">
 <meta name="twitter:card" content="summary">
@@ -83,7 +83,7 @@
 			
 				<li><a href="/stars.github.io/" target="_blank">主页</a></li>
 			
-				<li><a href="/stars.github.io/tags/%E9%9A%8F%E7%AC%94/" target="_blank">随笔</a></li>
+				<li><a href="/stars.github.io/%E9%9A%8F%E7%AC%94/index.html" target="_blank">随笔</a></li>
 			
 			</ul>
 		</nav>
@@ -255,7 +255,7 @@
 				
 					<li style="width: 50%"><a href="/stars.github.io/">主页</a></li>
 		        
-					<li style="width: 50%"><a href="/stars.github.io/tags/%E9%9A%8F%E7%AC%94/">随笔</a></li>
+					<li style="width: 50%"><a href="/stars.github.io/%E9%9A%8F%E7%AC%94/index.html">随笔</a></li>
 		        
 				</ul>
 			</nav>
@@ -274,9 +274,57 @@
             <article id="post-mybatis源码分析-mybatis配置阶段的执行流程分析" class="article article-type-post " itemscope itemprop="blogPost">
   <div class="article-inner">
     
+      <header class="article-header">
+  
+  
+    <h1 class="article-title" itemprop="name">
+      mybatis源码分析--mybatis配置阶段的执行流程分析
+    </h1>
+  
+
+
+  
+  
+        
+        <span id="busuanzi_container_page_pv" style='display:none' class="archive-article-date">
+              <i class="icon-smile icon"></i> 阅读数：<span id="busuanzi_value_page_pv"></span>次
+        </span>
+
+<a href="/stars.github.io/2021/05/20/mybatis%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90-mybatis%E9%85%8D%E7%BD%AE%E9%98%B6%E6%AE%B5%E7%9A%84%E6%89%A7%E8%A1%8C%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90/" class="archive-article-date">
+        <time datetime="2021-05-20T07:28:15.683Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-05-20</time>
+</a>
+
+  
+  
+    
+<div style="margin-top:10px;">
+  <span class="post-time">
+    <span class="post-meta-item-icon">
+      <!-- fonts.scss -->
+      <!-- 百度字体平台:http://fontstore.baidu.com/static/editor/index.html -->
+      <i class="icon-statistics"></i>
+      <span class="post-meta-item-text"> 字数统计:</span>
+      <span class="post-count">4.4k字</span>
+    </span>
+  </span>
+
+  <span class="post-time">
+    &nbsp; | &nbsp;
+    <span class="post-meta-item-icon">
+      <i class="icon-book icon"></i>
+      <span class="post-meta-item-text"> 阅读时长≈</span>
+      <span class="post-count">20分</span>
+    </span>
+  </span>
+</div>
+
+
+  
+  </header>
+  
   <div class="article-entry" itemprop="articleBody">
     
-    <h1 id="mybatis源码分析-mybatis配置阶段的执行流程分析"><a href="#mybatis源码分析-mybatis配置阶段的执行流程分析" class="headerlink" title="mybatis源码分析-mybatis配置阶段的执行流程分析"></a>mybatis源码分析-mybatis配置阶段的执行流程分析</h1><h3 id="hello-world"><a href="#hello-world" class="headerlink" title="hello world"></a>hello world</h3><p>看源码到底怎么去看，我总结的是要有目的的去看源码。例如mybatis,我们在github拉下来源码后发现一堆代码，没头没尾无从下手。但是如果我们先写一个Demo,来分析这个demo的每一步到底干了什么，就好分析了。这也就是为啥学习一门新技术都需要先学习怎么使用。</p>
+    <h2 id="mybatis源码分析-mybatis配置阶段的执行流程分析"><a href="#mybatis源码分析-mybatis配置阶段的执行流程分析" class="headerlink" title="mybatis源码分析-mybatis配置阶段的执行流程分析"></a>mybatis源码分析-mybatis配置阶段的执行流程分析</h2><p>看源码到底怎么去看，我总结的是要有目的的去看源码。例如mybatis,我们在github拉下来源码后发现一堆代码，没头没尾无从下手。但是如果我们先写一个Demo,来分析这个demo的每一步到底干了什么，就好分析了。这也就是为啥学习一门新技术都需要先学习怎么使用。</p>
 <h5 id="创建一个maven项目，引入mybatis的依赖"><a href="#创建一个maven项目，引入mybatis的依赖" class="headerlink" title="创建一个maven项目，引入mybatis的依赖"></a>创建一个maven项目，引入mybatis的依赖</h5><pre><code class="xml">&lt;dependency&gt;
     &lt;groupId&gt;org.mybatis&lt;/groupId&gt;
     &lt;artifactId&gt;mybatis&lt;/artifactId&gt;
@@ -776,7 +824,7 @@ parser.parse();
         </li>
         <li>
           <strong>本文链接：</strong>
-          <a href="https://bigfish777.github.io/stars.github.io/stars.github.io/2021/05/20/mybatis源码分析-mybatis配置阶段的执行流程分析/" title="" target="_blank">https://bigfish777.github.io/stars.github.io/stars.github.io/2021/05/20/mybatis源码分析-mybatis配置阶段的执行流程分析/</a>
+          <a href="https://bigfish777.github.io/stars.github.io/stars.github.io/2021/05/20/mybatis源码分析-mybatis配置阶段的执行流程分析/" title="mybatis源码分析--mybatis配置阶段的执行流程分析" target="_blank">https://bigfish777.github.io/stars.github.io/stars.github.io/2021/05/20/mybatis源码分析-mybatis配置阶段的执行流程分析/</a>
         </li>
         
         <li>
