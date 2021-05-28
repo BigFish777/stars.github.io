@@ -6,24 +6,24 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="https://bigfish777.github.io/stars.github.io">
-  <title>一颗小土豆</title>
+  <title>mybatis源码分析--mybatis配置阶段的执行流程分析 | 一颗小土豆</title>
   <meta name="generator" content="hexo-theme-yilia-plus">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   
-    
-    <!-- <meta name="keywords" content="Java Python 大数据 算法">
-    <meta name="description" content="一颗小土豆"> -->
-  
-  <meta name="description" content="一颗小土豆">
-<meta property="og:type" content="website">
-<meta property="og:title" content="一颗小土豆">
-<meta property="og:url" content="https://bigfish777.github.io/stars.github.io/index.html">
+  <meta name="description" content="mybatis源码分析-mybatis配置阶段的执行流程分析看源码到底怎么去看，我总结的是要有目的的去看源码。例如mybatis,我们在github拉下来源码后发现一堆代码，没头没尾无从下手。但是如果我们先写一个Demo,来分析这个demo的每一步到底干了什么，就好分析了。这也就是为啥学习一门新技术都需要先学习怎么使用。 创建一个maven项目，引入mybatis的依赖&lt;dependency">
+<meta property="og:type" content="article">
+<meta property="og:title" content="mybatis源码分析--mybatis配置阶段的执行流程分析">
+<meta property="og:url" content="https://bigfish777.github.io/stars.github.io/2021/05/27/mybatis%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90-mybatis%E9%85%8D%E7%BD%AE%E9%98%B6%E6%AE%B5%E7%9A%84%E6%89%A7%E8%A1%8C%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90/index.html">
 <meta property="og:site_name" content="一颗小土豆">
-<meta property="og:description" content="一颗小土豆">
+<meta property="og:description" content="mybatis源码分析-mybatis配置阶段的执行流程分析看源码到底怎么去看，我总结的是要有目的的去看源码。例如mybatis,我们在github拉下来源码后发现一堆代码，没头没尾无从下手。但是如果我们先写一个Demo,来分析这个demo的每一步到底干了什么，就好分析了。这也就是为啥学习一门新技术都需要先学习怎么使用。 创建一个maven项目，引入mybatis的依赖&lt;dependency">
 <meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="c:/Users/24267/AppData/Roaming/Typora/typora-user-images/image-20210311132924065.png">
+<meta property="article:published_time" content="2021-05-27T10:33:18.499Z">
+<meta property="article:modified_time" content="2021-05-27T10:33:18.499Z">
 <meta property="article:author" content="一颗小土豆">
 <meta property="article:tag" content="Java Python 大数据 算法">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="c:/Users/24267/AppData/Roaming/Typora/typora-user-images/image-20210311132924065.png">
   
     <link rel="alternative" href="/stars.github.io/atom.xml" title="一颗小土豆" type="application/atom+xml">
   
@@ -237,133 +237,25 @@
               class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            
-
-  
-    <article id="post-深入浅出Java虚拟机篇-运行时的数据区域1" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-  <div class="article-entry" itemprop="articleBody">
-    
-    <hr>
-<h2 id="title-深入浅出Java虚拟机篇-运行时的数据区域"><a href="#title-深入浅出Java虚拟机篇-运行时的数据区域" class="headerlink" title="title:深入浅出Java虚拟机篇-运行时的数据区域"></a>title:深入浅出Java虚拟机篇-运行时的数据区域</h2><h2 id="一、运行时数据区域-JVM内存模型"><a href="#一、运行时数据区域-JVM内存模型" class="headerlink" title="一、运行时数据区域(JVM内存模型)"></a>一、运行时数据区域(JVM内存模型)</h2><p>​    在Java虚拟机中执行Java程序的过程都会把他所管理的内存划分为若干个不同的数据区域。这些区域各有各自的用途，有的区域随着虚拟机的进程的启动而一直存在，有的区域则是随着用户线程的启动而启动，结束而销毁。这些区域根据《Java虚拟机规范》的规定共同组成了运行时区域。也就是JVM的内存模型的组成。</p>
-<img src="https://imgconvert.csdnimg.cn/aHR0cHM6Ly91c2VyLWdvbGQtY2RuLnhpdHUuaW8vMjAxNy85LzQvZGQzYjE1YjNkODgyNmZhZWFlMjA2Mzk3NmZiOTkyMTM_aW1hZ2VWaWV3Mi8wL3cvMTI4MC9oLzk2MC9mb3JtYXQvd2VicC9pZ25vcmUtZXJyb3IvMQ" alt="img" style="zoom: 67%;" />
-
-<h3 id="1-1-程序计数器（Program-Counter-Register）"><a href="#1-1-程序计数器（Program-Counter-Register）" class="headerlink" title="1.1 程序计数器（Program Counter Register）"></a>1.1 程序计数器（Program Counter Register）</h3><h5 id="1-1-1-程序计数器是什么？🧐又能干什么？"><a href="#1-1-1-程序计数器是什么？🧐又能干什么？" class="headerlink" title="1.1.1 程序计数器是什么？🧐又能干什么？"></a>1.1.1 程序计数器是什么？🧐又能干什么？</h5><p>​    <strong>程序计数器简单的理解，他是当前线程所执行的字节码行号指示器。通过它可以知道下一条要执行字节码指令。</strong>他是程序控制流的指示器，分支、循环、跳转、异常处理、线程恢复等都需要依赖它来完成。</p>
-<p>​    <strong>注意：</strong>由于Java虚拟机中的多线程是通过线程轮流切换来分配处理器执行时间的，也就是在任何一个时刻，处理器都只会处理一条线程中的指令，并且的话处理器不敢保证每个线程的程序都会执行完成，也就是说当线程一执行一半切换到线程二时，如果没有程序计数器记录当前线程中指令执行的位置，那就会导致每次线程再次被处理器执行时，就会从头再来。<strong>因此，为了线程切换后能恢复到正确的执行位置每条线程都需要一个自己独有的程序计数器，各个线程之间的程序计数器互不影响，独立储存。所以我们称这一类的内存区域为”<code>线程私有</code>“.</strong></p>
-<h3 id="1-2-JAVA虚拟机栈（Java-Virtual-Machine-Stack）"><a href="#1-2-JAVA虚拟机栈（Java-Virtual-Machine-Stack）" class="headerlink" title="1.2 JAVA虚拟机栈（Java Virtual Machine Stack）"></a>1.2 JAVA虚拟机栈（Java Virtual Machine Stack）</h3><p>​    java虚拟机栈是<strong>线程私有的</strong>，他的生命周期与线程相同。虚拟机栈是Java方法执行的线程内存模型：每个方法被执行时，都会同步创建一个<strong>栈帧</strong>（Stack Frame）用于储存<code>局部变量表</code>、<code>操作数栈</code>、<code>动态链接</code>、<code>方法出口</code>等信息。每个方法的调用到执行完成的过程，对应着一个栈帧在虚拟机栈中入栈到出栈的过程。</p>
-<h5 id="1-2-1-局部变量表"><a href="#1-2-1-局部变量表" class="headerlink" title="1.2.1 局部变量表"></a>1.2.1 局部变量表</h5><p>​    局部变量表存放了编译期何种Java虚拟机基本数据类型、对象引用（引用指针、句柄或者于此对象相关的位置）和returnAddress。</p>
-<p>​    这些数据在局部变量表中都以<strong>局部变量槽（Slot）</strong>来表示，其中64位的长度的long和double类型的数据会占两个变量槽，其余的只会占一个。</p>
-<h5 id="1-2-2-异常"><a href="#1-2-2-异常" class="headerlink" title="1.2.2 异常"></a>1.2.2 异常</h5><p>在《Java<strong>虚拟机规范中</strong>》中，虚拟机栈规定了两类的异常状况：</p>
-<p><strong>StackOverflowError：</strong>当线程请求的栈深度大于了虚拟机所允许的栈深度就会抛出该异常 StackOverflowError（堆栈溢出错误）</p>
-<p><strong>demo:</strong> </p>
-<pre><code class="java">    private static int stackLength;
-    public static void stackLeak()&#123;
-        stackLength++;
-        stackLeak();
-    &#125;
-
-    /**
-     * 最大堆大小: -Xmx5M
-     */
-    public static void main(String[] args) &#123;
-        try &#123;
-            stackLeak();
-        &#125;catch (Throwable e)&#123;
-            e.printStackTrace();
-            System.out.println(&quot;stack length: &quot;+ stackLength);
-        &#125;
-
-    &#125;
-    // 虚拟机栈深度为：23812  抛出StackOverFlowError异常
-    // Exception in thread &quot;main&quot; java.lang.StackOverflowError
-    // stack length: 23812
-</code></pre>
-<p>在上面的案例中我们可以看出他是一段简单的递归调用，但是并没有指定结束条件。就导致了成了一个死循环，这时我们在下图中可以看出来，他会不断的进行入栈，直到栈深度大于了虚拟机限制的深度，抛出了 <code>java.lang.StackOverflowError</code></p>
-<img src="C:\Users\24267\AppData\Roaming\Typora\typora-user-images\image-20210528223846222.png" alt="image-20210528223846222" style="zoom: 150%;" />
-
-<p><strong>OutOfMemoryError:</strong> 当栈扩展时无法申请到足够的内存时就会抛出OutOfMemoryError。但是在HotSpot 中虚拟机栈容量是不可以的动态扩展的，也就是不会出现<code>OOM</code>, 但其实不然，如果申请时就失败，仍然会出现<code>OOM</code>异常。</p>
-<h3 id="1-3-本地方法栈（Native-Method-Stack）"><a href="#1-3-本地方法栈（Native-Method-Stack）" class="headerlink" title="1.3 本地方法栈（Native Method Stack）"></a>1.3 本地方法栈（Native Method Stack）</h3><p>本地方法栈与虚拟机栈类似，区别是虚拟机栈为虚拟机执行Java方法服务，而本地方法栈是为了虚拟机栈使用的。</p>
-<h3 id="1-4-Java-堆（Heap）"><a href="#1-4-Java-堆（Heap）" class="headerlink" title="1.4 Java 堆（Heap）"></a>1.4 Java 堆（Heap）</h3><p>​    Java堆是线程共享的内存区域，在虚拟机创建时创建，此内存区域的唯一目的就是存放实例对象，在《JAVA虚拟机规范》中队java 堆描述是：”The heap is the runtime data area from which memory for all class instances and arrays is allocated（所有的Java对象实例以及数组在堆上分配）“。这个<code>几乎</code>就很有深度。随着Java语言的发展，现在可以看到未来可能会出现值类型的支持，由于即时编译的技术进步，像逃逸分析、栈上分配、标量替换优化手段，Java对象实例分配在堆已经不在呢么绝对了。</p>
-<p>Java是垃圾回收管理的内存区域，因此也称作”GC堆”，现在垃圾收集器大部分都是基于分代收集理论设计的，因此经常会出现 ”新生代“、”老年代“、”Eden 空间“、”From Survivor 空间“、”To Survivor 空间“等名词。 在十几年前， HotSpot虚拟机内部的垃圾回收内存器是全部 <code>经典分代</code>来设计的：新生代、老年代收集器搭配工作。在这种背景下这些说发还是能不会产生太多的歧义的。但是到了如今的今天，垃圾收集器技术与十几年前早已不同，HotSpot里面也出现了非分代设计的垃圾收集器。</p>
-<p>下图为分代设计的垃圾收集器内存模型：</p>
-<p><img src="https://imgconvert.csdnimg.cn/aHR0cHM6Ly91c2VyLWdvbGQtY2RuLnhpdHUuaW8vMjAxNy85LzQvOTcxMDE4MDMxNWQzNTc1NmI2OGU5YzVkYWY0NGQ2ZTU_aW1hZ2VWaWV3Mi8wL3cvMTI4MC9oLzk2MC9mb3JtYXQvd2VicC9pZ25vcmUtZXJyb3IvMQ" alt="img"></p>
-<h5 id="1-3-2-异常"><a href="#1-3-2-异常" class="headerlink" title="1.3.2 异常"></a>1.3.2 异常</h5><p>​    当Java堆中没有内存完成实力分配，并且无法扩展时，Java虚拟机就会抛出 <code>OutOfMemoryError</code>异常。 </p>
-<p><strong>demo:</strong></p>
-<pre><code class="java">/** 
-  * -Xmx2M
-  * Exception in thread &quot;main&quot; java.lang.OutOfMemoryError: Java heap space
-  *     at com.xphu.DemoTest.main(DemoTest.java:5)
-  */
-public static void main(String[] args) &#123;
-    byte[] bytes = new byte[1024 * 1024 * 1024];
-    System.out.println(bytes.length);
-&#125;
-
-    
-</code></pre>
-<p><img src="C:\Users\24267\AppData\Roaming\Typora\typora-user-images\image-20210529002804273.png" alt="image-20210529002804273"></p>
-
-    
-
-    
-
-    
-
-  </div>
-  <div class="article-info article-info-index">
-    
-    
-    
-
-    
-    <p class="article-more-link">
-      <a class="article-more-a" href="/stars.github.io/2021/05/29/%E6%B7%B1%E5%85%A5%E6%B5%85%E5%87%BAJava%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%AF%87-%E8%BF%90%E8%A1%8C%E6%97%B6%E7%9A%84%E6%95%B0%E6%8D%AE%E5%8C%BA%E5%9F%9F1/">展开全文 >></a>
-    </p>
-    
-
-    
-    <div class="clearfix"></div>
-  </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-mybatis源码分析-mybatis配置阶段的执行流程分析" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+            <article id="post-mybatis源码分析-mybatis配置阶段的执行流程分析" class="article article-type-post " itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <header class="article-header">
   
   
-    <h1 itemprop="name">
-	
-	  <a class="article-title" href="/stars.github.io/2021/05/27/mybatis%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90-mybatis%E9%85%8D%E7%BD%AE%E9%98%B6%E6%AE%B5%E7%9A%84%E6%89%A7%E8%A1%8C%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90/">mybatis源码分析--mybatis配置阶段的执行流程分析</a>
-	
+    <h1 class="article-title" itemprop="name">
+      mybatis源码分析--mybatis配置阶段的执行流程分析
     </h1>
   
 
 
   
   
+        
+        <span id="busuanzi_container_page_pv" style='display:none' class="archive-article-date">
+              <i class="icon-smile icon"></i> 阅读数：<span id="busuanzi_value_page_pv"></span>次
+        </span>
+
 <a href="/stars.github.io/2021/05/27/mybatis%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90-mybatis%E9%85%8D%E7%BD%AE%E9%98%B6%E6%AE%B5%E7%9A%84%E6%89%A7%E8%A1%8C%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90/" class="archive-article-date">
         <time datetime="2021-05-27T10:33:18.499Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-05-27</time>
 </a>
@@ -371,6 +263,27 @@ public static void main(String[] args) &#123;
   
   
     
+<div style="margin-top:10px;">
+  <span class="post-time">
+    <span class="post-meta-item-icon">
+      <!-- fonts.scss -->
+      <!-- 百度字体平台:http://fontstore.baidu.com/static/editor/index.html -->
+      <i class="icon-statistics"></i>
+      <span class="post-meta-item-text"> 字数统计:</span>
+      <span class="post-count">4.4k字</span>
+    </span>
+  </span>
+
+  <span class="post-time">
+    &nbsp; | &nbsp;
+    <span class="post-meta-item-icon">
+      <i class="icon-book icon"></i>
+      <span class="post-meta-item-text"> 阅读时长≈</span>
+      <span class="post-count">20分</span>
+    </span>
+  </span>
+</div>
+
 
   
   </header>
@@ -845,7 +758,59 @@ parser.parse();
     
 
     
+    <div class="page-reward">
+      <a href="javascript:void(0);" class="page-reward-btn tooltip-top" target="_self">
+        <div class="tooltip tooltip-east">
+          <span class="tooltip-item">
+            赏
+          </span>
+          <span class="tooltip-content">
+            <span class="tooltip-text">
+              <span class="tooltip-inner">
+                <p class="reward-p"><i class="icon icon-quo-left"></i>感谢老铁送的大火箭<i
+                    class="icon icon-quo-right"></i></p>
+                <div class="reward-box">
+                  
+                  <div class="reward-box-item">
+                    <img class="reward-img" src="/stars.github.io/img/zhifubao_play.jpg">
+                    <span class="reward-type">支付宝</span>
+                  </div>
+                  
+                  
+                  <div class="reward-box-item">
+                    <img class="reward-img" src="/stars.github.io/img/weixin_play.jpg">
+                    <span class="reward-type">微信</span>
+                  </div>
+                  
+                </div>
+              </span>
+            </span>
+          </span>
+        </div>
+      </a>
+    </div>
+    
 
+    
+    <div class="declare"> 
+      <ul class="post-copyright">
+        <li>
+          <strong>本文作者：</strong>
+          一颗小土豆
+        </li>
+        <li>
+          <strong>本文链接：</strong>
+          <a href="https://bigfish777.github.io/stars.github.io/stars.github.io/2021/05/27/mybatis源码分析-mybatis配置阶段的执行流程分析/" title="mybatis源码分析--mybatis配置阶段的执行流程分析" target="_blank">https://bigfish777.github.io/stars.github.io/stars.github.io/2021/05/27/mybatis源码分析-mybatis配置阶段的执行流程分析/</a>
+        </li>
+        
+        <li>
+          <strong>版权声明： </strong>
+          
+          本博客所有文章除特别声明外，均采用 <a href="https://github.com/JoeyBling/hexo-theme-yilia-plus/blob/master/LICENSE" rel="external nofollow" target="_blank">MIT</a> 许可协议。转载请注明出处！
+        </li>
+        
+      </ul>
+    </div>
     
 
   </div>
@@ -855,16 +820,85 @@ parser.parse();
     
 
     
-    <p class="article-more-link">
-      <a class="article-more-a" href="/stars.github.io/2021/05/27/mybatis%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90-mybatis%E9%85%8D%E7%BD%AE%E9%98%B6%E6%AE%B5%E7%9A%84%E6%89%A7%E8%A1%8C%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90/">展开全文 >></a>
-    </p>
+
     
+    
+<div class="share-btn share-icons tooltip-left">
+  <div class="tooltip tooltip-east">
+    <span class="tooltip-item">
+      <a href="javascript:;" class="share-sns share-outer">
+        <i class="icon icon-share"></i>
+      </a>
+    </span>
+    <span class="tooltip-content">
+      <div class="share-wrap">
+        <div class="share-icons">
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="icon icon-weibo"></i>
+          </a>
+          <!-- <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="icon icon-weixin"></i>
+          </a> -->
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="icon icon-qq"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="icon icon-douban"></i>
+          </a>
+          <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a>
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="icon icon-facebook"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="icon icon-twitter"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="icon icon-google"></i>
+          </a>
+        </div>
+      </div>
+    </span>
+  </div>
+</div>
+
+<div class="page-modal wx-share js-wx-box">
+    <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+     <!-- <img src="//pan.baidu.com/share/qrcode?url=https://bigfish777.github.io/stars.github.io/2021/05/27/mybatis%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90-mybatis%E9%85%8D%E7%BD%AE%E9%98%B6%E6%AE%B5%E7%9A%84%E6%89%A7%E8%A1%8C%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90/" alt="微信分享二维码"> -->
+    </div>
+</div>
+
+<div class="mask js-mask"></div>
 
     
     <div class="clearfix"></div>
   </div>
   </div>
 </article>
+
+
+<nav id="article-nav">
+  
+    <a href="/stars.github.io/2021/05/29/%E6%B7%B1%E5%85%A5%E6%B5%85%E5%87%BAJava%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%AF%87-%E8%BF%90%E8%A1%8C%E6%97%B6%E7%9A%84%E6%95%B0%E6%8D%AE%E5%8C%BA%E5%9F%9F1/" id="article-nav-newer" class="article-nav-link-wrap">
+      <i class="icon-circle-left"></i>
+      <div class="article-nav-title">
+        
+          (no title)
+        
+      </div>
+    </a>
+  
+  
+    <a href="/stars.github.io/2021/05/19/hello-world/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">Hello World</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
 
 <aside class="wrap-side-operation">
     <div class="mod-side-operation">
@@ -885,95 +919,24 @@ parser.parse();
 
 
 
-  
-    <article id="post-hello-world" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-  
-  
-    <h1 itemprop="name">
-	
-	  <a class="article-title" href="/stars.github.io/2021/05/19/hello-world/">Hello World</a>
-	
-    </h1>
-  
 
-
-  
-  
-<a href="/stars.github.io/2021/05/19/hello-world/" class="archive-article-date">
-        <time datetime="2021-05-19T08:02:58.892Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-05-19</time>
-</a>
-
-  
-  
-    
-
-  
-  </header>
-  
-  <div class="article-entry" itemprop="articleBody">
-    
-    <p>Welcome to <a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a>! This is your very first post. Check <a target="_blank" rel="noopener" href="https://hexo.io/docs/">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a target="_blank" rel="noopener" href="https://hexo.io/docs/troubleshooting.html">troubleshooting</a> or you can ask me on <a target="_blank" rel="noopener" href="https://github.com/hexojs/hexo/issues">GitHub</a>.</p>
-<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><pre><code class="bash">$ hexo new &quot;My New Post&quot;
-</code></pre>
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/writing.html">Writing</a></p>
-<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><pre><code class="bash">$ hexo server
-</code></pre>
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/server.html">Server</a></p>
-<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><pre><code class="bash">$ hexo generate
-</code></pre>
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/generating.html">Generating</a></p>
-<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><pre><code class="bash">$ hexo deploy
-</code></pre>
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/one-command-deployment.html">Deployment</a></p>
-
-    
-
-    
-
-    
-
-  </div>
-  <div class="article-info article-info-index">
-    
-    
-    
-
-    
-    <p class="article-more-link">
-      <a class="article-more-a" href="/stars.github.io/2021/05/19/hello-world/">展开全文 >></a>
-    </p>
-    
-
-    
-    <div class="clearfix"></div>
-  </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
+<div id="SOHUCS" sid="mybatis源码分析-mybatis配置阶段的执行流程分析" ></div> 
+<script charset="utf-8" type="text/javascript" src="//changyan.sohu.com/upload/changyan.js" ></script>
+<script type="text/javascript">
+    window.changyan.api.config({
+        appid: "cyvsPJC6C",
+        conf: "7b0a2a2eb519531533581bf3300dbf5e"
+    });
+</script>
+</script>
 
 
 
 
-  
-  
+
+
+
+
 
 
           </div>
@@ -1013,8 +976,8 @@ parser.parse();
     <script>
 	var yiliaConfig = {
 		mathjax: false,
-		isHome: true,
-		isPost: false,
+		isHome: false,
+		isPost: true,
 		isArchive: false,
 		isTag: false,
 		isCategory: false,
